@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amex Consumer Lending · Product Strategy</title>
+<style>
+  /* ── CONFIG-DRIVEN: only edit the CONFIG object below ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0c1a2e;
+    --navy-mid: #16284a;
+    --accent: #016fd0;
+    --accent-light: #e8f2fc;
+    --accent-mid: #b3d4f5;
+    --gold: #c8972a;
+    --gold-light: #fdf3dc;
+    --text-primary: #0c1a2e;
+    --text-secondary: #4a5568;
+    --text-muted: #8896a7;
+    --border: #e2e8f0;
+    --border-strong: #c8d5e3;
+    --surface: #ffffff;
+    --surface-1: #f7fafc;
+    --surface-2: #eef4fb;
+    --radius: 8px;
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--surface-1);
+    color: var(--text-primary);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* NAV */
+  .nav {
+    background: var(--navy);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 52px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .nav-logo {
+    width: 28px; height: 28px;
+    background: var(--accent);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: white; letter-spacing: 0.5px;
+  }
+  .nav-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.9);
+    letter-spacing: 0.2px;
+  }
+  .nav-subtitle {
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    margin-left: 4px;
+  }
+  .nav-tabs {
+    display: flex;
+    gap: 2px;
+    height: 100%;
+    align-items: center;
+  }
+  .nav-tab {
+    height: 52px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.5);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+  }
+  .nav-tab:hover { color: rgba(255,255,255,0.85); }
+  .nav-tab.active {
+    color: white;
+    border-bottom-color: var(--accent);
+  }
+  .nav-meta {
+    font-size: 11px;
+    color: rgba(255,255,255,0.35);
+    font-family: var(--font-mono);
+  }
+
+  /* CONTENT */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* PAGE HEADER */
+  .page-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+  .page-eyebrow {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .page-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+  .page-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    max-width: 560px;
+  }
+  .page-badge {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: var(--gold-light);
+    color: var(--gold);
+    border: 1px solid #e8d5a0;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* KPI STRIP */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 2rem;
+  }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+  }
+  .kpi-card.accent-border { border-left: 3px solid var(--accent); }
+  .kpi-card.gold-border { border-left: 3px solid var(--gold); }
+  .kpi-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .kpi-value {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .kpi-delta {
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .kpi-delta.up { color: #2d7d46; }
+  .kpi-delta.down { color: #c53030; }
+  .kpi-delta.neutral { color: var(--text-muted); }
+
+  /* GRID LAYOUTS */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+  .grid-60-40 { display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .tag-blue { background: var(--accent-light); color: var(--accent); }
+  .tag-gold { background: var(--gold-light); color: var(--gold); }
+  .tag-green { background: #e6f4ec; color: #2d7d46; }
+  .tag-red { background: #fde8e8; color: #c53030; }
+  .tag-gray { background: var(--surface-1); color: var(--text-muted); border: 1px solid var(--border); }
+
+  /* PRODUCT MATRIX */
+  .product-row {
+    display: grid;
+    grid-template-columns: 160px 1fr 80px 80px 80px;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+  }
+  .product-row:last-child { border-bottom: none; }
+  .product-row.header {
+    background: var(--surface-1);
+    border-radius: 6px 6px 0 0;
+    border-bottom: 1px solid var(--border-strong);
+  }
+  .product-cell {
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .product-row.header .product-cell {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+  }
+  .product-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 13px;
+  }
+  .product-desc { color: var(--text-secondary); font-size: 11px; margin-top: 2px; }
+
+  /* BAR CHART */
+  .bar-chart { display: flex; flex-direction: column; gap: 10px; }
+  .bar-row { display: grid; grid-template-columns: 110px 1fr 50px; gap: 10px; align-items: center; }
+  .bar-label { font-size: 12px; color: var(--text-secondary); text-align: right; }
+  .bar-track { height: 8px; background: var(--surface-1); border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+  .bar-fill.accent { background: var(--accent); }
+  .bar-fill.gold { background: var(--gold); }
+  .bar-fill.muted { background: var(--border-strong); }
+  .bar-value { font-size: 12px; font-weight: 600; color: var(--text-primary); font-family: var(--font-mono); }
+
+  /* PRIORITY STACK */
+  .priority-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .priority-item:last-child { border-bottom: none; }
+  .priority-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--navy);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .priority-num.accent { background: var(--accent); }
+  .priority-num.gold { background: var(--gold); }
+  .priority-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
+  .priority-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+  /* INSIGHT BOX */
+  .insight-box {
+    background: var(--surface-2);
+    border: 1px solid var(--accent-mid);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  .insight-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .insight-text {
+    font-size: 13px;
+    color: var(--text-primary);
+    line-height: 1.6;
+  }
+
+  /* SCATTER PROXY (bubble chart via CSS) */
+  .position-grid {
+    position: relative;
+    height: 240px;
+    border-left: 1px solid var(--border-strong);
+    border-bottom: 1px solid var(--border-strong);
+    margin: 1rem 0.5rem 1.5rem;
+  }
+  .axis-label-x {
+    font-size: 10px; color: var(--text-muted);
+    position: absolute; bottom: -20px; right: 0;
+    text-transform: uppercase; letter-spacing: 0.6px;
+  }
+  .axis-label-y {
+    font-size: 10px; color: var(--text-muted);
+    position: absolute; top: 0; left: -36px;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    writing-mode: vertical-rl; transform: rotate(180deg);
+  }
+  .bubble {
+    position: absolute;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600;
+    color: white;
+    cursor: default;
+    transition: transform 0.15s;
+  }
+  .bubble:hover { transform: scale(1.1); }
+  .bubble-label {
+    position: absolute;
+    font-size: 10px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    top: -16px;
+    left: 50%; transform: translateX(-50%);
+  }
+
+  /* DIVIDER */
+  .section-divider {
+    height: 1px; background: var(--border);
+    margin: 2rem 0;
+  }
+
+  /* PLACEHOLDER TABS */
+  .coming-soon {
+    text-align: center;
+    padding: 5rem 2rem;
+    color: var(--text-muted);
+  }
+  .coming-soon-icon {
+    font-size: 2rem; margin-bottom: 1rem;
+  }
+  .coming-soon h3 { font-size: 16px; color: var(--text-secondary); margin-bottom: 8px; }
+  .coming-soon p { font-size: 13px; }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     CONFIG — edit only this object
+════════════════════════════════════════ -->
+<script>
+const CONFIG = {
+  brand: "American Express",
+  division: "Consumer Lending",
+  version: "v1.0 · Aug 2026",
+  tabs: [
+    { id: "product", label: "01 · Product Strategy" },
+    { id: "market",  label: "02 · Market Assessment" },
+    { id: "competitive", label: "03 · Competitive Landscape" },
+    { id: "appendix", label: "04 · Appendix" }
+  ],
+  kpis: [
+    { label: "Loans / Billed Business", value: "14%", delta: "↑ vs 12% in FY22", trend: "up", border: "accent-border" },
+    { label: "NII Upside Prize", value: "$2.8B", delta: "vs peer benchmark", trend: "neutral", border: "gold-border" },
+    { label: "FICO 720+ Share", value: "68%", delta: "of revolving portfolio", trend: "up", border: "accent-border" },
+    { label: "Revolve Rate Gap", value: "~6pp", delta: "below prime card peers", trend: "down", border: "" }
+  ],
+  insight: "Amex's consumer lending penetration of billed business sits at ~14% — structurally below prime card peers at 18–28%. Closing half this gap across the existing cardholder base represents a $1.8–3.8B NII opportunity without new customer acquisition.",
+  products: [
+    { name: "Pay It / Plan It", desc: "BNPL / instalment on existing spend", nii: "Low", growth: "High", priority: "Optimise", tag: "tag-blue" },
+    { name: "Personal Loans", desc: "Unsecured term lending, existing members", nii: "Medium", growth: "Medium", priority: "Grow", tag: "tag-green" },
+    { name: "HELOC", desc: "Home equity line, sponsor-bank model", nii: "High", growth: "Medium", priority: "Enter", tag: "tag-gold" },
+    { name: "Auto Finance", desc: "Hybrid lender + forward-flow buyer", nii: "Medium", growth: "High", priority: "Enter", tag: "tag-gold" },
+    { name: "Mortgage", desc: "Referral / partnership only", nii: "Low", growth: "Low", priority: "No-go", tag: "tag-red" }
+  ],
+  loanMix: [
+    { label: "Personal Loans", pct: 72, type: "accent" },
+    { label: "Pay It Plan It", pct: 18, type: "gold" },
+    { label: "Other / Pilot", pct: 10, type: "muted" }
+  ],
+  priorities: [
+    { num: 1, color: "accent", title: "Accelerate revolve rate on core card", desc: "Targeted balance-building offers for FICO 720+ segments; re-price introductory APR to compete with Chase Sapphire and Citi Premier." },
+    { num: 2, color: "accent", title: "Scale HELOC via sponsor-bank entry", desc: "Partner with a mid-tier bank to originate; Amex provides distribution and member data. Avoids balance sheet risk while capturing NII economics." },
+    { num: 3, color: "gold", title: "Deepen Pay It Plan It monetisation", desc: "Shift positioning from a spend enabler to a recurring finance tool; introduce tiered fee structures anchored to instalment term length." },
+    { num: 4, color: "", title: "Build auto finance forward-flow channel", desc: "Pilot institutional buyer model for auto originations; assess hybrid lender licence feasibility in H2 2026." }
+  ]
+};
+</script>
+
+<!-- ════════════════════════════════════════
+     LAYOUT SHELL — do not edit
+════════════════════════════════════════ -->
+
+<nav class="nav">
+  <div class="nav-brand">
+    <div class="nav-logo">AXP</div>
+    <span class="nav-title" id="nav-title"></span>
+    <span class="nav-subtitle" id="nav-subtitle"></span>
+  </div>
+  <div class="nav-tabs" id="nav-tabs"></div>
+  <span class="nav-meta" id="nav-meta"></span>
+</nav>
+
+<div id="pages">
+  <div class="page active" id="page-product">
+    <div class="container">
+      <div class="page-header">
+        <div>
+          <div class="page-eyebrow">Product Strategy</div>
+          <div class="page-title">Consumer lending product portfolio</div>
+          <div class="page-desc">Current product mix, NII contribution, strategic prioritisation, and growth pathway across five product categories.</div>
+        </div>
+        <span class="page-badge">FY2026 Strategy View</span>
+      </div>
+
+      <div class="kpi-strip" id="kpi-strip"></div>
+
+      <div class="insight-box">
+        <div class="insight-label">Strategic thesis</div>
+        <div class="insight-text" id="insight-text"></div>
+      </div>
+
+      <div class="grid-60-40">
+        <!-- Product matrix -->
+        <div class="card">
+          <div class="card-title">Product matrix <span class="card-tag tag-gray">5 products</span></div>
+          <div id="product-matrix">
+            <div class="product-row header">
+              <div class="product-cell">Product</div>
+              <div class="product-cell">Description</div>
+              <div class="product-cell">NII yield</div>
+              <div class="product-cell">Growth</div>
+              <div class="product-cell">Priority</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loan mix -->
+        <div>
+          <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-title">Current loan mix</div>
+            <div class="bar-chart" id="loan-mix"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Positioning map <span class="card-tag tag-blue">NII vs growth</span></div>
+            <div class="position-grid" id="position-grid">
+              <span class="axis-label-x">NII yield →</span>
+              <span class="axis-label-y">Growth potential</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Strategic priorities <span class="card-tag tag-blue">FY2026–27</span></div>
+          <div id="priorities"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Key assumptions &amp; risks</div>
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 4px;">
+            <div style="padding: 10px 12px; background: var(--surface-1); border-radius: 6px; border-left: 3px solid var(--accent);">
+              <div style="font-size: 11px; font-weight: 600; color: var(--accent); margin-bottom: 3px;">Assumption</div>
+              <div style="font-size: 12px; color: var(--text-secondary);">HELOC sponsor-bank model avoids OCC licensing; Amex acts as marketer/distributor only under existing bank agreements.</div>
+            </div>
+            <div style="padding: 10px 12px; background: var(--surface-1); border-radius: 6px; border-left: 3px solid var(--gold);">
+              <div style="font-size: 11px; font-weight: 600; color: var(--gold); margin-bottom: 3px;">Risk</div>
+              <div style="font-size: 12px; color: var(--text-secondary);">Revolve rate acceleration may conflict with Amex's premium charge-card brand positioning with high-FICO segments.</div>
+            </div>
+            <div style="padding: 10px 12px; background: var(--surface-1); border-radius: 6px; border-left: 3px solid #c53030;">
+              <div style="font-size: 11px; font-weight: 600; color: #c53030; margin-bottom: 3px;">Dependency</div>
+              <div style="font-size: 12px; color: var(--text-secondary);">Auto forward-flow channel requires H2 2026 pilot data before institutional buyer term sheet; timeline sensitive to rate environment.</div>
+            </div>
+            <div style="padding: 10px 12px; background: var(--surface-1); border-radius: 6px; border-left: 3px solid #2d7d46;">
+              <div style="font-size: 11px; font-weight: 600; color: #2d7d46; margin-bottom: 3px;">Enabler</div>
+              <div style="font-size: 12px; color: var(--text-secondary);">Member data advantage (spend, FICO, tenure) is the primary underwriting edge across all new product entries.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-market">
+    <div class="container">
+      <div class="coming-soon">
+        <div class="coming-soon-icon">📊</div>
+        <h3>Market Assessment</h3>
+        <p>Tab 02 — coming next</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-competitive">
+    <div class="container">
+      <div class="coming-soon">
+        <div class="coming-soon-icon">🔍</div>
+        <h3>Competitive Landscape</h3>
+        <p>Tab 03 — coming next</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-appendix">
+    <div class="container">
+      <div class="coming-soon">
+        <div class="coming-soon-icon">📎</div>
+        <h3>Appendix</h3>
+        <p>Tab 04 — coming next</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     RENDER ENGINE — do not edit
+════════════════════════════════════════ -->
+<script>
+function init(cfg) {
+  // Nav
+  document.getElementById('nav-title').textContent = cfg.brand + ' · ' + cfg.division;
+  document.getElementById('nav-meta').textContent = cfg.version;
+
+  // Tabs
+  const tabBar = document.getElementById('nav-tabs');
+  cfg.tabs.forEach((t, i) => {
+    const el = document.createElement('div');
+    el.className = 'nav-tab' + (i === 0 ? ' active' : '');
+    el.textContent = t.label;
+    el.onclick = () => switchTab(i, cfg.tabs);
+    tabBar.appendChild(el);
+  });
+
+  // KPIs
+  const strip = document.getElementById('kpi-strip');
+  cfg.kpis.forEach(k => {
+    strip.innerHTML += `
+      <div class="kpi-card ${k.border}">
+        <div class="kpi-label">${k.label}</div>
+        <div class="kpi-value">${k.value}</div>
+        <div class="kpi-delta ${k.trend}">${k.delta}</div>
+      </div>`;
+  });
+
+  // Insight
+  document.getElementById('insight-text').textContent = cfg.insight;
+
+  // Product matrix
+  const matrix = document.getElementById('product-matrix');
+  cfg.products.forEach(p => {
+    matrix.innerHTML += `
+      <div class="product-row">
+        <div class="product-cell"><div class="product-name">${p.name}</div><div class="product-desc">${p.desc}</div></div>
+        <div class="product-cell"></div>
+        <div class="product-cell">${p.nii}</div>
+        <div class="product-cell">${p.growth}</div>
+        <div class="product-cell"><span class="card-tag ${p.tag}">${p.priority}</span></div>
+      </div>`;
+  });
+
+  // Loan mix bars
+  const loanMix = document.getElementById('loan-mix');
+  cfg.loanMix.forEach(l => {
+    loanMix.innerHTML += `
+      <div class="bar-row">
+        <div class="bar-label">${l.label}</div>
+        <div class="bar-track"><div class="bar-fill ${l.type}" style="width:${l.pct}%"></div></div>
+        <div class="bar-value">${l.pct}%</div>
+      </div>`;
+  });
+
+  // Positioning bubbles
+  const bubbleData = [
+    { label: "PIPI", x: 20, y: 75, size: 32, color: "#016fd0" },
+    { label: "PL",   x: 45, y: 55, size: 38, color: "#016fd0" },
+    { label: "HELOC",x: 72, y: 50, size: 36, color: "#c8972a" },
+    { label: "Auto", x: 60, y: 72, size: 34, color: "#c8972a" },
+    { label: "Mtg",  x: 25, y: 20, size: 28, color: "#8896a7" }
+  ];
+  const grid = document.getElementById('position-grid');
+  bubbleData.forEach(b => {
+    const el = document.createElement('div');
+    el.className = 'bubble';
+    el.style.cssText = `left:${b.x}%;bottom:${b.y - b.size/2*0.4}%;width:${b.size}px;height:${b.size}px;background:${b.color};margin-left:-${b.size/2}px;`;
+    el.innerHTML = `<span class="bubble-label">${b.label}</span>`;
+    el.title = b.label;
+    grid.appendChild(el);
+  });
+
+  // Priorities
+  const pri = document.getElementById('priorities');
+  cfg.priorities.forEach((p, i) => {
+    pri.innerHTML += `
+      <div class="priority-item">
+        <div class="priority-num ${p.color}">${i + 1}</div>
+        <div>
+          <div class="priority-title">${p.title}</div>
+          <div class="priority-desc">${p.desc}</div>
+        </div>
+      </div>`;
+  });
+}
+
+function switchTab(idx, tabs) {
+  document.querySelectorAll('.nav-tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+  document.querySelectorAll('.page').forEach((p, i) => p.classList.toggle('active', i === idx));
+}
+
+document.addEventListener('DOMContentLoaded', () => init(CONFIG));
+</script>
+</body>
+</html>
